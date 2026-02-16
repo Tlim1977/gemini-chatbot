@@ -1,7 +1,7 @@
 // Vercel Serverless Function for Google Gemini API
 export default async function handler(req, res) {
   // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     const API_KEY = process.env.GEMINI_API_KEY;
 
     if (!API_KEY) {
+      console.error('GEMINI_API_KEY not found in environment');
       return res.status(500).json({ error: 'API key not configured' });
     }
 
@@ -49,6 +50,8 @@ export default async function handler(req, res) {
     
     // Add current message
     prompt += `User: ${message}\nAssistant:`;
+
+    console.log('Calling Gemini API...');
 
     // Call Google Gemini API
     const response = await fetch(
@@ -106,6 +109,8 @@ export default async function handler(req, res) {
     // Extract the text response
     const aiResponse = data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not generate a response.';
 
+    console.log('Success! Response generated');
+
     return res.status(200).json({ 
       response: aiResponse,
       emotion: analyzeEmotion(aiResponse)
@@ -142,3 +147,4 @@ function analyzeEmotion(text) {
   
   return 'neutral';
 }
+
