@@ -1,5 +1,5 @@
-// Vercel Serverless Function for Google Gemini API
-export default async function handler(req, res) {
+ // Vercel Serverless Function
+module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,16 +28,17 @@ export default async function handler(req, res) {
     const API_KEY = process.env.GEMINI_API_KEY;
 
     if (!API_KEY) {
-      console.error('GEMINI_API_KEY not found in environment');
+      console.error('GEMINI_API_KEY not found');
       return res.status(500).json({ error: 'API key not configured' });
     }
+
+    console.log('Building prompt...');
 
     // Build conversation context
     let prompt = '';
     
     // Add conversation history for context
     if (conversationHistory && conversationHistory.length > 0) {
-      // Include last 10 messages for context
       const recentHistory = conversationHistory.slice(-10);
       recentHistory.forEach(msg => {
         if (msg.role === 'user') {
@@ -54,76 +55,66 @@ export default async function handler(req, res) {
     console.log('Calling Gemini API...');
 
     // Call Google Gemini API
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.9,
+          topK: 1,
+          topP: 1,
+          maxOutputTokens: 2048,
         },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.9,
-            topK: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
-          },
-          safetySettings: [
-            {
-              category: 'HARM_CATEGORY_HARASSMENT',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            },
-            {
-              category: 'HARM_CATEGORY_HATE_SPEECH',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            },
-            {
-              category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            },
-            {
-              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            }
-          ]
-        })
-      }
-    );
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
+        ]
+      })
+    });
 
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Gemini API Error:', errorData);
-      return res.status(response.status).json({ 
+      const errorText = await response.text();
+      console.error('Gemini API Error:', response.status, errorText);
+      return res.status(500).json({ 
         error: 'Failed to get response from AI',
-        details: errorData 
+        details: errorText 
       });
     }
 
     const data = await response.json();
+    console.log('Gemini response received');
     
     // Extract the text response
-    const aiResponse = data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not generate a response.';
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+    
+    const emotion = analyzeEmotion(aiResponse);
 
-    console.log('Success! Response generated');
+    console.log('Success! Sending response');
 
     return res.status(200).json({ 
       response: aiResponse,
-      emotion: analyzeEmotion(aiResponse)
+      emotion: emotion
     });
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Caught error:', error.message);
     return res.status(500).json({ 
       error: 'Internal server error',
       message: error.message 
     });
   }
-}
+};
 
 // Simple emotion detection
 function analyzeEmotion(text) {
@@ -147,4 +138,3 @@ function analyzeEmotion(text) {
   
   return 'neutral';
 }
-
