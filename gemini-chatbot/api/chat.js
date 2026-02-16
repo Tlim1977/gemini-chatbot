@@ -1,4 +1,4 @@
- // Vercel Serverless Function
+// Vercel Serverless Function
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -54,8 +54,8 @@ module.exports = async (req, res) => {
 
     console.log('Calling Gemini API...');
 
-    // Call Google Gemini API
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+    // Call Google Gemini API with working model
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${API_KEY}`;
     
     const response = await fetch(apiUrl, {
       method: 'POST',
