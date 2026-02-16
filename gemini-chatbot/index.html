@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Expressive AI Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            height: 100%;
+            height: -webkit-fill-available;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            height: -webkit-fill-available;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            height: -webkit-fill-available;
+            background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%);
+        }
+        
+        .header {
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .header-title h1 {
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+        
+        .header-title p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .upload-btn {
+            padding: 0.5rem 1rem;
+            background: #a855f7;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        }
+        
+        .upload-btn:hover {
+            background: #9333ea;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .character-panel {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .character-display {
+            width: 256px;
+            height: 256px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .character-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .character-placeholder {
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .character-placeholder .emoji {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .expression-label {
+            text-align: center;
+        }
+        
+        .expression-label p:first-child {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        
+        .expression-label p:last-child {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #a855f7;
+            text-transform: capitalize;
+        }
+        
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            min-height: 0;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 5rem;
+        }
+        
+        .welcome-message p:first-child {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-message p:last-child {
+            font-size: 0.875rem;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 28rem;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+        }
+        
+        .message.user .message-bubble {
+            background: #a855f7;
+            color: white;
+        }
+        
+        .message.assistant .message-bubble {
+            background: white;
+            color: #1f2937;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .emotion-tag {
+            font-size: 0.75rem;
+            color: #a855f7;
+            margin-bottom: 0.25rem;
+            text-transform: capitalize;
+        }
+        
+        .loading {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: #a855f7;
+            border-radius: 50%;
+            animation: bounce 1s infinite;
+        }
+        
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .input-area {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+            min-height: 70px;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .input-container input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .input-container input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+        
+        .send-btn {
+            padding: 0.75rem 1.5rem;
+            background: #a855f7;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            background: #9333ea;
+        }
+        
+        .send-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            max-width: 42rem;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+        }
+        
+        .expressions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .expression-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .expression-item label {
+            cursor: pointer;
+        }
+        
+        .expression-item span {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+        }
+        
+        .expression-preview {
+            width: 100%;
+            height: 160px;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background 0.2s;
+        }
+        
+        .expression-preview:hover {
+            background: #e5e7eb;
+        }
+        
+        .expression-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .expression-preview-placeholder {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+        
+        .expression-item input[type="file"] {
+            display: none;
+        }
+        
+        .modal-footer {
+            margin-top: 1.5rem;
+            text-align: right;
+        }
+        
+        .done-btn {
+            padding: 0.5rem 1.5rem;
+            background: #a855f7;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .done-btn:hover {
+            background: #9333ea;
+        }
+        
+        /* Mobile Landscape Optimization */
+        @media screen and (max-width: 900px) {
+            .character-panel {
+                width: 200px;
+                padding: 1rem;
+            }
+            
+            .character-display {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .character-placeholder .emoji {
+                font-size: 2.5rem;
+            }
+            
+            .character-placeholder p {
+                font-size: 0.75rem;
+            }
+            
+            .expression-label p:first-child {
+                font-size: 0.75rem;
+            }
+            
+            .expression-label p:last-child {
+                font-size: 1rem;
+            }
+            
+            .header {
+                padding: 0.75rem;
+            }
+            
+            .header-title h1 {
+                font-size: 1rem;
+            }
+            
+            .header-title p {
+                font-size: 0.75rem;
+            }
+            
+            .avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 0.875rem;
+            }
+            
+            .upload-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .messages-container {
+                padding: 1rem;
+            }
+            
+            .message-bubble {
+                max-width: 20rem;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            .input-area {
+                padding: 0.75rem;
+                min-height: 60px;
+            }
+            
+            .input-container {
+                display: flex;
+                gap: 0.5rem;
+            }
+            
+            .input-container input {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+                min-width: 0;
+                flex: 1;
+            }
+            
+            .send-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .modal-content {
+                padding: 1rem;
+                width: 95%;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.25rem;
+            }
+            
+            .expressions-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .expression-item {
+                padding: 0.5rem;
+            }
+            
+            .expression-preview {
+                height: 100px;
+            }
+            
+            .expression-item span {
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Very small mobile screens */
+        @media screen and (max-width: 640px) {
+            .character-panel {
+                width: 150px;
+                padding: 0.5rem;
+            }
+            
+            .character-display {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .character-placeholder .emoji {
+                font-size: 2rem;
+            }
+            
+            .header-left {
+                gap: 0.5rem;
+            }
+            
+            .expressions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .welcome-message {
+                margin-top: 2rem;
+                padding: 0 0.5rem;
+            }
+            
+            .welcome-message p:first-child {
+                font-size: 1rem;
+            }
+            
+            .welcome-message p:last-child {
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Portrait mobile - hide character panel, show compact version */
+        @media screen and (max-width: 640px) and (orientation: portrait) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .character-panel {
+                width: 100%;
+                flex-direction: row;
+                justify-content: center;
+                padding: 0.75rem;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .character-display {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 0;
+                margin-right: 1rem;
+            }
+            
+            .expression-label {
+                text-align: left;
+            }
+        }
+        
+        /* Dark Mode */
+        body.dark-mode {
+            background: #1a1a1a;
+        }
+        
+        body.dark-mode .container {
+            background: linear-gradient(135deg, #1e1b4b 0%, #1e3a8a 100%);
+        }
+        
+        body.dark-mode .header,
+        body.dark-mode .character-panel,
+        body.dark-mode .input-area {
+            background: #2d2d2d;
+            border-color: #404040;
+        }
+        
+        body.dark-mode .header h1,
+        body.dark-mode .expression-label p:last-child {
+            color: #f3f4f6;
+        }
+        
+        body.dark-mode .header p,
+        body.dark-mode .expression-label p:first-child {
+            color: #9ca3af;
+        }
+        
+        body.dark-mode .character-display {
+            background: linear-gradient(135deg, #404040 0%, #525252 100%);
+        }
+        
+        body.dark-mode .character-placeholder {
+            color: #6b7280;
+        }
+        
+        body.dark-mode .message.assistant .message-bubble {
+            background: #374151;
+            color: #f3f4f6;
+        }
+        
+        body.dark-mode .message.assistant .message-time {
+            color: #9ca3af;
+        }
+        
+        body.dark-mode textarea {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        body.dark-mode .modal-content {
+            background: #2d2d2d;
+        }
+        
+        body.dark-mode .modal-content h2,
+        body.dark-mode .expression-item span {
+            color: #f3f4f6;
+        }
+        
+        body.dark-mode .expression-item {
+            border-color: #404040;
+        }
+        
+        body.dark-mode .expression-preview {
+            background: #404040;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="avatar">AI</div>
+                <div class="header-title">
+                    <h1>Expressive Chatbot</h1>
+                    <p>Powered by Google Gemini AI ✨</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="upload-btn" id="stopBtn" onclick="stopSpeaking()" style="display: none; background: #ef4444;">
+                    🔇 Stop
+                </button>
+                <button class="upload-btn" onclick="openHistoryModal()">📜 History</button>
+                <button class="upload-btn" onclick="openVoiceModal()">🎙️ Voice</button>
+                <button class="upload-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+                <button class="upload-btn" onclick="openModal()">📤 Upload</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Character Panel -->
+            <div class="character-panel">
+                <div class="character-display" id="characterDisplay">
+                    <div class="character-placeholder">
+                        <div class="emoji">🤖</div>
+                        <p>Upload character images</p>
+                    </div>
+                </div>
+                <div class="expression-label">
+                    <p>Current Expression</p>
+                    <p id="currentExpression">neutral</p>
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="chat-panel">
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-message">
+                        <p>👋 Welcome to the Expressive Chatbot Demo!</p>
+                        <p>Try saying: "Hello", "I'm sad", "Wow that's amazing!", "What do you think?", "I'm confused"</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area">
+                    <div class="input-container">
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            placeholder="Type your message..."
+                            onkeypress="handleKeyPress(event)"
+                        />
+                        <button class="send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal" id="uploadModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Upload Character Expressions</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="expressions-grid">
+                    <div class="expression-item">
+                        <label for="happy">
+                            <span>Happy</span>
+                            <div class="expression-preview" id="preview-happy">
+                                <div class="expression-preview-placeholder">
+                                    📤<br>Click to upload
+                                </div>
+                            </div>
+                            <input type="file" id="happy" accept="image/*" onchange="handleImageUpload('happy', this)">
+                        </label>
+                    </div>
+                    <div class="expression-item">
+                        <label for="sad">
+                            <span>Sad</span>
+                            <div class="expression-preview" id="preview-sad">
+                                <div class="expression-preview-placeholder">
+                                    📤<br>Click to upload
+                                </div>
+                            </div>
+                            <input type="file" id="sad" accept="image/*" onchange="handleImageUpload('sad', this)">
+                        </label>
+                    </div>
+                    <div class="expression-item">
+                        <label for="neutral">
+                            <span>Neutral</span>
+                            <div class="expression-preview" id="preview-neutral">
+                                <div class="expression-preview-placeholder">
+                                    📤<br>Click to upload
+                                </div>
+                            </div>
+                            <input type="file" id="neutral" accept="image/*" onchange="handleImageUpload('neutral', this)">
+                        </label>
+                    </div>
+                    <div class="expression-item">
+                        <label for="excited">
+                            <span>Excited</span>
+                            <div class="expression-preview" id="preview-excited">
+                                <div class="expression-preview-placeholder">
+                                    📤<br>Click to upload
+                                </div>
+                            </div>
+                            <input type="file" id="excited" accept="image/*" onchange="handleImageUpload('excited', this)">
+                        </label>
+                    </div>
+                    <div class="expression-item">
+                        <label for="thinking">
+                            <span>Thinking</span>
+                            <div class="expression-preview" id="preview-thinking">
+                                <div class="expression-preview-placeholder">
+                                    📤<br>Click to upload
+                                </div>
+                            </div>
+                            <input type="file" id="thinking" accept="image/*" onchange="handleImageUpload('thinking', this)">
+                        </label>
+                    </div>
+                    <div class="expression-item">
+                        <label for="confused">
+                            <span>Confused</span>
+                            <div class="expression-preview" id="preview-confused">
+                                <div class="expression-preview-placeholder">
+                                    📤<br>Click to upload
+                                </div>
+                            </div>
+                            <input type="file" id="confused" accept="image/*" onchange="handleImageUpload('confused', this)">
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="done-btn" onclick="closeModal()">Done</button>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- History Modal -->
+        <div class="modal" id="historyModal" onclick="closeModalOnBackdrop(event, 'historyModal')">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Chat History</h2>
+                    <button class="close-btn" onclick="closeHistoryModal()">×</button>
+                </div>
+                
+                <div id="historyList" style="padding: 1rem; max-height: 400px; overflow-y: auto;">
+                    <p style="text-align: center; color: #6b7280; padding: 2rem;">No chat history yet. Start chatting to save conversations!</p>
+                </div>
+                
+                <div style="padding: 0 1rem 1rem;">
+                    <button onclick="clearAllHistory()" style="width: 100%; padding: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                        🗑️ Clear All History
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Voice Settings Modal -->
+        <div class="modal" id="voiceModal" onclick="closeModalOnBackdrop(event, 'voiceModal')">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Voice Settings</h2>
+                    <button class="close-btn" onclick="closeVoiceModal()">×</button>
+                </div>
+                
+                <div style="padding: 1rem;">
+                    <!-- Voice Presets -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
+                            🎭 Voice Preset
+                        </label>
+                        <select id="voicePreset" onchange="applyPreset(this.value)" 
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.5rem; cursor: pointer;">
+                            <option value="custom">⚙️ Custom (use sliders)</option>
+                            <option value="child">👧 Child (Young, High)</option>
+                            <option value="teen">🧒 Teen (Moderate, Quick)</option>
+                            <option value="adult">👩 Adult (Natural)</option>
+                            <option value="mature">👵 Mature (Deeper, Slower)</option>
+                            <option value="robot">🤖 Robot (Monotone)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Pitch Control -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
+                            <span>🎵 Pitch</span>
+                            <span id="pitchValue" style="color: #a855f7;">1.0</span>
+                        </label>
+                        <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.1" value="1.0" 
+                               oninput="updatePitch(this.value)" 
+                               style="width: 100%; cursor: pointer;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
+                            <span>Low/Deep</span>
+                            <span>High/Squeaky</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Speed Control -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
+                            <span>⚡ Speed</span>
+                            <span id="speedValue" style="color: #a855f7;">0.9</span>
+                        </label>
+                        <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="0.9" 
+                               oninput="updateSpeed(this.value)" 
+                               style="width: 100%; cursor: pointer;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
+                            <span>Slow/Calm</span>
+                            <span>Fast/Excited</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="previewVoice()" style="width: 100%; padding: 0.75rem; background: #a855f7; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-bottom: 0.5rem;">
+                        🔊 Preview Voice
+                    </button>
+                    
+                    <button onclick="resetVoice()" style="width: 100%; padding: 0.5rem; background: #6b7280; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        🔄 Reset to Default
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const expressions = {
+            happy: null,
+            sad: null,
+            neutral: null,
+            excited: null,
+            thinking: null,
+            confused: null
+        };
+
+        let currentExpression = 'neutral';
+        let isLoading = false;
+        
+        // Voice settings
+        let voicePitch = 1.0;
+        let voiceSpeed = 0.9;
+        let isSpeaking = false;
+        
+        // Persistent user name
+        let savedUserName = localStorage.getItem('userName') || null;
+
+        function openModal() {
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('uploadModal').classList.remove('active');
+        }
+        
+        // Dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+        
+        // Voice modal functions
+        function openVoiceModal() {
+            document.getElementById('voiceModal').classList.add('active');
+        }
+        
+        function closeVoiceModal() {
+            document.getElementById('voiceModal').classList.remove('active');
+        }
+        
+        function closeModalOnBackdrop(event, modalId) {
+            if (event.target.id === modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+        }
+        
+        function applyPreset(preset) {
+            let pitch, speed;
+            
+            switch(preset) {
+                case 'child':
+                    pitch = 1.6;
+                    speed = 1.1;
+                    break;
+                case 'teen':
+                    pitch = 1.3;
+                    speed = 1.05;
+                    break;
+                case 'adult':
+                    pitch = 1.0;
+                    speed = 0.9;
+                    break;
+                case 'mature':
+                    pitch = 0.8;
+                    speed = 0.8;
+                    break;
+                case 'robot':
+                    pitch = 0.6;
+                    speed = 1.0;
+                    break;
+                default: // custom
+                    return; // Don't change sliders for custom
+            }
+            
+            // Update sliders
+            voicePitch = pitch;
+            voiceSpeed = speed;
+            document.getElementById('pitchSlider').value = pitch;
+            document.getElementById('speedSlider').value = speed;
+            document.getElementById('pitchValue').textContent = pitch.toFixed(1);
+            document.getElementById('speedValue').textContent = speed.toFixed(1);
+        }
+        
+        function updatePitch(value) {
+            voicePitch = parseFloat(value);
+            document.getElementById('pitchValue').textContent = value;
+            document.getElementById('voicePreset').value = 'custom';
+        }
+        
+        function updateSpeed(value) {
+            voiceSpeed = parseFloat(value);
+            document.getElementById('speedValue').textContent = value;
+            document.getElementById('voicePreset').value = 'custom';
+        }
+        
+        function previewVoice() {
+            speakText('Hello! This is how I sound with the current settings.');
+        }
+        
+        function resetVoice() {
+            voicePitch = 1.0;
+            voiceSpeed = 0.9;
+            document.getElementById('pitchSlider').value = 1.0;
+            document.getElementById('speedSlider').value = 0.9;
+            document.getElementById('pitchValue').textContent = '1.0';
+            document.getElementById('speedValue').textContent = '0.9';
+            document.getElementById('voicePreset').value = 'adult';
+        }
+        
+        // Text-to-Speech
+        function speakText(text) {
+            // Remove emojis before speaking
+            const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+            
+            if (!cleanText) return; // Don't speak if only emojis
+            
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = voiceSpeed;
+            utterance.pitch = voicePitch;
+            utterance.volume = 1.0;
+            
+            // Show stop button when speaking starts
+            utterance.onstart = function() {
+                isSpeaking = true;
+                document.getElementById('stopBtn').style.display = 'block';
+            };
+            
+            // Hide stop button when speaking ends
+            utterance.onend = function() {
+                isSpeaking = false;
+                document.getElementById('stopBtn').style.display = 'none';
+            };
+            
+            utterance.onerror = function() {
+                isSpeaking = false;
+                document.getElementById('stopBtn').style.display = 'none';
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+        
+        function stopSpeaking() {
+            speechSynthesis.cancel();
+            isSpeaking = false;
+            document.getElementById('stopBtn').style.display = 'none';
+        }
+
+        function handleImageUpload(emotion, input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    expressions[emotion] = e.target.result;
+                    const preview = document.getElementById('preview-' + emotion);
+                    preview.innerHTML = '<img src="' + e.target.result + '" alt="' + emotion + '">';
+                    updateCharacterDisplay();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateCharacterDisplay() {
+            const display = document.getElementById('characterDisplay');
+            if (expressions[currentExpression]) {
+                display.innerHTML = '<img src="' + expressions[currentExpression] + '" alt="' + currentExpression + '">';
+            } else {
+                display.innerHTML = '<div class="character-placeholder"><div class="emoji">🤖</div><p>Upload character images</p></div>';
+            }
+        }
+
+        function setExpression(emotion) {
+            currentExpression = emotion;
+            document.getElementById('currentExpression').textContent = emotion;
+            updateCharacterDisplay();
+        }
+
+        function analyzeEmotion(text) {
+            const lowerText = text.toLowerCase();
+            
+            if (lowerText.includes('great') || lowerText.includes('awesome') || 
+                lowerText.includes('wonderful') || lowerText.includes('love') ||
+                lowerText.includes('happy') || lowerText.includes('excellent') ||
+                lowerText.includes('fantastic')) {
+                return 'happy';
+            }
+            if (lowerText.includes('sorry') || lowerText.includes('unfortunately') || 
+                lowerText.includes('sad') || lowerText.includes('apologize')) {
+                return 'sad';
+            }
+            if ((lowerText.includes('!') && (lowerText.includes('wow') || lowerText.includes('amazing'))) ||
+                lowerText.includes('incredible') || lowerText.includes('yes!')) {
+                return 'excited';
+            }
+            if (lowerText.includes('hmm') || lowerText.includes('let me think') || 
+                lowerText.includes('considering') || lowerText.includes('analyzing')) {
+                return 'thinking';
+            }
+            if (lowerText.includes('not sure') || lowerText.includes('confus') || 
+                lowerText.includes('unclear') || lowerText.includes("don't understand")) {
+                return 'confused';
+            }
+            
+            return 'neutral';
+        }
+
+        function addMessage(role, content, emotion) {
+            const container = document.getElementById('messagesContainer');
+            const welcomeMsg = container.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + role;
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+
+            if (role === 'assistant' && emotion) {
+                const emotionTag = document.createElement('div');
+                emotionTag.className = 'emotion-tag';
+                emotionTag.textContent = emotion;
+                bubbleDiv.appendChild(emotionTag);
+            }
+
+            const textP = document.createElement('p');
+            textP.textContent = content;
+            bubbleDiv.appendChild(textP);
+            
+            // Add timestamp
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            timeDiv.textContent = timeString;
+            timeDiv.style.cssText = 'font-size: 0.7rem; color: #9ca3af; margin-top: 0.25rem; text-align: right;';
+            bubbleDiv.appendChild(timeDiv);
+            
+            // Add speak button for assistant messages
+            if (role === 'assistant') {
+                const speakBtn = document.createElement('button');
+                speakBtn.textContent = '🔊 Speak';
+                speakBtn.style.cssText = 'margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #a855f7; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;';
+                speakBtn.onclick = function() {
+                    speakText(content);
+                };
+                bubbleDiv.appendChild(speakBtn);
+            }
+
+            messageDiv.appendChild(bubbleDiv);
+            container.appendChild(messageDiv);
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showLoading() {
+            const container = document.getElementById('messagesContainer');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.id = 'loadingIndicator';
+            loadingDiv.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+            container.appendChild(loadingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                loading.remove();
+            }
+        }
+
+        // Simulate AI responses for demo purposes
+        let conversationHistory = [];
+        let chatSessions = [];
+        let currentSessionId = Date.now();
+        
+        // Helper function to extract user's name from conversation history
+        function extractUserName() {
+            // First check if we have a saved name
+            if (savedUserName) {
+                return savedUserName;
+            }
+            
+            // Then check conversation history
+            for (let msg of conversationHistory) {
+                if (msg.role === 'user') {
+                    const match = msg.content.match(/(?:my name is|i'm|im|i am|call me)\s+([a-z]+)/i);
+                    if (match) {
+                        return match[1];
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function getAIResponse(userMessage) {
+            const lowerMsg = userMessage.toLowerCase();
+            
+            // Memory: Learn user's name (CHECK THIS FIRST!)
+            if (lowerMsg.match(/^(my name is|i'm|im|i am|call me) ([a-z]+)/i)) {
+                const match = userMessage.match(/^(?:my name is|i'm|im|i am|call me)\s+([a-z]+)/i);
+                if (match) {
+                    const name = match[1];
+                    // Save name permanently
+                    savedUserName = name;
+                    localStorage.setItem('userName', name);
+                    return `Nice to meet you, ${name}! I'll remember that even after you close this page. How can I help you today?`;
+                }
+            }
+            
+            // Memory: Check if user is asking about their name (more specific patterns)
+            if (lowerMsg.match(/(what's my name|what is my name|do you remember my name|do you know my name|who am i)/)) {
+                const userName = extractUserName();
+                if (userName) {
+                    return `Yes! Your name is ${userName}. How could I forget? 😊`;
+                } else {
+                    return 'I don\'t think you\'ve told me your name yet! What should I call you?';
+                }
+            }
+            
+            // Memory: Forget user's name
+            if (lowerMsg.match(/(forget my name|forget me|reset my name|don't remember me|dont remember me)/)) {
+                savedUserName = null;
+                localStorage.removeItem('userName');
+                return 'Okay! I\'ve forgotten your name. Feel free to introduce yourself again anytime! 😊';
+            }
+            
+            // Memory: Reference previous topics
+            const userName = extractUserName();
+            const hasGreetedBefore = conversationHistory.some(msg => 
+                msg.role === 'user' && msg.content.toLowerCase().match(/^(hello|hi|hey)/)
+            );
+            
+            // Greetings (with memory)
+            if (lowerMsg.match(/^(hello|hi|hey|greetings|good morning|good afternoon|good evening)/)) {
+                if (userName && hasGreetedBefore) {
+                    return `Hello again, ${userName}! Great to continue our conversation! What would you like to talk about?`;
+                } else if (userName) {
+                    return `Hello, ${userName}! Great to see you! What would you like to talk about?`;
+                }
+                const greetings = [
+                    'Hello! I\'m so happy to meet you! How can I help you today?',
+                    'Hi there! Great to see you! What would you like to talk about?',
+                    'Hey! I\'m excited to chat with you! What\'s on your mind?'
+                ];
+                return greetings[Math.floor(Math.random() * greetings.length)];
+            }
+            
+            // How are you / How is your day
+            if (lowerMsg.match(/(how are you|how's your day|how is your day|how're you doing|how do you do)/)) {
+                const responses = [
+                    'I\'m doing wonderful, thank you for asking! I\'m always excited to chat and help people. How are you doing today?',
+                    'I\'m feeling great! I love having conversations and learning about people. How about you - how\'s your day going?',
+                    'I\'m excellent, thanks! Ready to chat and help however I can. What\'s going on with you today?'
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            // What can you do / help with
+            if (lowerMsg.match(/(what can you|what do you do|how can you help|what are you|who are you)/)) {
+                return 'I\'m an expressive AI chatbot! I can chat with you about various topics and show different emotions through my expressions. I can discuss ideas, answer questions, or just have a friendly conversation. What would you like to talk about?';
+            }
+            
+            // User sharing they're good/fine/okay
+            if (lowerMsg.match(/^(i'm|im|i am) (good|fine|okay|ok|great|well|alright)/)) {
+                return 'That\'s wonderful to hear! I\'m so glad you\'re doing well. Is there anything specific you\'d like to chat about or any way I can help?';
+            }
+            
+            // User sharing positive emotions
+            if (lowerMsg.match(/(happy|excited|great|wonderful|amazing|fantastic|awesome|love|excellent)/)) {
+                const responses = [
+                    'That\'s absolutely wonderful! I\'m so happy for you! What\'s making things so great?',
+                    'That sounds fantastic! I love hearing positive news! Tell me more about it!',
+                    'Wow, that\'s amazing! Your enthusiasm is contagious! What happened?'
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            // User sharing negative emotions
+            if (lowerMsg.match(/(sad|upset|depressed|down|unhappy|terrible|awful|bad day)/)) {
+                const responses = [
+                    'I\'m really sorry to hear that you\'re feeling this way. Do you want to talk about what\'s bothering you?',
+                    'I\'m sorry you\'re going through this. Sometimes it helps to share what\'s on your mind. I\'m here to listen.',
+                    'That sounds tough. I\'m here for you if you want to talk about it. What\'s been going on?'
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            // Tired/stressed
+            if (lowerMsg.match(/(tired|exhausted|stressed|overwhelmed|busy)/)) {
+                return 'It sounds like you\'ve been dealing with a lot. I\'m sorry you\'re feeling tired. Maybe take a moment to relax and breathe? Is there anything I can help lighten your load?';
+            }
+            
+            // Questions starting with "what"
+            if (lowerMsg.startsWith('what ')) {
+                if (lowerMsg.includes('think') || lowerMsg.includes('opinion')) {
+                    return 'Hmm, let me think about that for a moment... That\'s an interesting question. It really depends on various factors. What\'s your perspective on it?';
+                }
+                return 'That\'s an interesting question! Let me consider that carefully. Based on what you\'re asking, I think it depends on the context. What specifically are you curious about?';
+            }
+            
+            // Questions starting with "why"
+            if (lowerMsg.startsWith('why ')) {
+                return 'That\'s a thought-provoking question. Let me think... There are usually multiple reasons for things like this. What\'s your take on it?';
+            }
+            
+            // Questions starting with "how"
+            if (lowerMsg.startsWith('how ')) {
+                return 'Good question! Let me think about the best way to explain this... Generally speaking, it involves several steps. What specific aspect are you most interested in?';
+            }
+            
+            // Questions with question mark
+            if (lowerMsg.includes('?')) {
+                return 'That\'s a great question! Let me think about that carefully. I want to give you a thoughtful answer. Could you tell me a bit more about what you\'re looking for?';
+            }
+            
+            // Wow expressions
+            if (lowerMsg.match(/(wow|omg|oh my god|incredible|unbelievable|no way)/)) {
+                return 'Wow! That\'s incredible! I\'m so excited about this! Tell me everything!';
+            }
+            
+            // Confused/don't understand
+            if (lowerMsg.match(/(confuse|confused|don't understand|dont get it|unclear|what do you mean)/)) {
+                return 'I\'m not entirely sure I understand what you\'re asking. Could you try explaining it in a different way? I want to make sure I help you properly!';
+            }
+            
+            // Thanks/gratitude
+            if (lowerMsg.match(/(thank|thanks|appreciate|grateful)/)) {
+                return 'You\'re very welcome! I\'m happy I could help! Is there anything else you\'d like to know?';
+            }
+            
+            // Goodbye
+            if (lowerMsg.match(/(bye|goodbye|see you|gotta go|have to go|talk later)/)) {
+                return 'Goodbye! It was wonderful chatting with you! Come back anytime - I\'m always here!';
+            }
+            
+            // Tell me about / talk about
+            if (lowerMsg.match(/(tell me about|talk about|tell me more)/)) {
+                return 'I\'d love to discuss that with you! That\'s a fascinating topic. What specifically interests you most about it?';
+            }
+            
+            // Jokes or fun
+            if (lowerMsg.match(/(joke|funny|laugh|humor)/)) {
+                return 'Haha! I love a good sense of humor! While I\'m better at chatting than telling jokes, I definitely appreciate the lighter side of things. What makes you laugh?';
+            }
+            
+            // Weather
+            if (lowerMsg.match(/(weather|rain|sunny|cold|hot)/)) {
+                return 'Weather can definitely affect our mood! I hope you\'re experiencing pleasant conditions where you are. What\'s the weather like for you?';
+            }
+            
+            // Feelings/emotions
+            if (lowerMsg.match(/(feel|feeling|emotion)/)) {
+                return 'Emotions are such an important part of being human! I\'m designed to understand and respond to different feelings. How are you feeling right now?';
+            }
+            
+            // Yes/No responses
+            if (lowerMsg.match(/^(yes|yeah|yep|yup|sure|absolutely)$/)) {
+                return 'Great! I\'m glad we\'re on the same page. What would you like to explore next?';
+            }
+            
+            if (lowerMsg.match(/^(no|nope|nah|not really)$/)) {
+                return 'I understand. No problem at all! Is there something else you\'d prefer to discuss?';
+            }
+            
+            // Default responses - more contextual
+            const defaultResponses = [
+                'That\'s interesting! I\'d love to hear more about your thoughts on this.',
+                'I see what you mean. Can you tell me more about that?',
+                'That\'s a good point. What else is on your mind?',
+                'Interesting perspective! What made you think about this?',
+                'I appreciate you sharing that. Is there a particular aspect you\'d like to explore?',
+                'That\'s worth considering. How do you feel about it?'
+            ];
+            
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isLoading) return;
+
+            // Add user message
+            addMessage('user', message);
+            conversationHistory.push({ role: 'user', content: message });
+            input.value = '';
+
+            // Show loading
+            isLoading = true;
+            setExpression('thinking');
+            showLoading();
+
+            // Call Gemini API
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversationHistory: conversationHistory
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get AI response');
+                }
+
+                const data = await response.json();
+                const aiResponse = data.response;
+                const emotion = data.emotion || 'neutral';
+                
+                hideLoading();
+                setExpression(emotion);
+                addMessage('assistant', aiResponse, emotion);
+                conversationHistory.push({ role: 'assistant', content: aiResponse, emotion: emotion });
+                
+                // Auto-speak the response
+                speakText(aiResponse);
+                
+                // Save to history
+                saveToHistory();
+                
+                isLoading = false;
+
+            } catch (error) {
+                console.error('Error calling AI:', error);
+                hideLoading();
+                const errorMsg = 'Sorry, I\'m having trouble connecting. Please try again.';
+                addMessage('assistant', errorMsg, 'confused');
+                conversationHistory.push({ role: 'assistant', content: errorMsg, emotion: 'confused' });
+                isLoading = false;
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // History functions
+        function openHistoryModal() {
+            loadHistoryList();
+            document.getElementById('historyModal').classList.add('active');
+        }
+        
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+        
+        function saveToHistory() {
+            if (conversationHistory.length === 0) return;
+            
+            const session = {
+                id: currentSessionId,
+                messages: conversationHistory,
+                timestamp: Date.now(),
+                preview: conversationHistory[0]?.content.substring(0, 50) || 'Chat session'
+            };
+            
+            // Add to sessions array
+            const existingIndex = chatSessions.findIndex(s => s.id === currentSessionId);
+            if (existingIndex >= 0) {
+                chatSessions[existingIndex] = session;
+            } else {
+                chatSessions.unshift(session);
+            }
+            
+            // Keep only last 10 sessions
+            chatSessions = chatSessions.slice(0, 10);
+            
+            // Save to localStorage
+            localStorage.setItem('chatSessions', JSON.stringify(chatSessions));
+        }
+        
+        function loadHistoryList() {
+            const historyList = document.getElementById('historyList');
+            
+            if (chatSessions.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No chat history yet. Start chatting to save conversations!</p>';
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            
+            chatSessions.forEach(session => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 1rem; margin-bottom: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer;';
+                div.onclick = () => loadSession(session);
+                
+                const preview = document.createElement('div');
+                preview.style.cssText = 'font-weight: 600; margin-bottom: 0.25rem;';
+                preview.textContent = session.preview + '...';
+                
+                const time = document.createElement('div');
+                time.style.cssText = 'font-size: 0.75rem; color: #6b7280;';
+                time.textContent = new Date(session.timestamp).toLocaleString();
+                
+                div.appendChild(preview);
+                div.appendChild(time);
+                historyList.appendChild(div);
+            });
+        }
+        
+        function loadSession(session) {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+            
+            conversationHistory = session.messages;
+            currentSessionId = session.id;
+            
+            session.messages.forEach(msg => {
+                addMessage(msg.role, msg.content, msg.emotion);
+            });
+            
+            closeHistoryModal();
+        }
+        
+        function clearAllHistory() {
+            if (confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+                chatSessions = [];
+                localStorage.removeItem('chatSessions');
+                loadHistoryList();
+            }
+        }
+        
+        // Load saved sessions on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('chatSessions');
+            if (saved) {
+                chatSessions = JSON.parse(saved);
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('uploadModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
